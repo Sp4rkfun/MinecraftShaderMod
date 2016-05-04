@@ -1,0 +1,22 @@
+/* Non-documented, but existing, Uniforms */
+uniform sampler2D gcolor;
+uniform sampler2D gdepth;
+uniform sampler2D gdepthtex;
+uniform sampler2D noisetex;
+uniform sampler2D gnormal;
+uniform sampler2D composite;
+uniform sampler2D gaux1;
+uniform sampler2D gaux2;
+uniform sampler2D gaux3;
+uniform sampler2D gaux4;
+uniform sampler2D shadowcolor;
+uniform vec3 skyColor;
+uniform vec3 upPosition;
+uniform float wetness;
+uniform float frameTimeCounter;
+uniform float sunAngle;
+uniform int isEyeInWater;
+uniform float eyeAltitude;
+uniform ivec2 eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
+uniform int fogMode;
