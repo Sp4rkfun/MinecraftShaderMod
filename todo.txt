@@ -1,0 +1,17 @@
+http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1286604-shaders-mod-updated-by-karyonix?page=53
+basic shadows
+toon shading, just cause
+water reflection
+moving objects
+sand + wind particles
+leaves
+underwater
+fire
+ambient occlusion
+water sumbersion consitent with above water
+blur when entering water
+lens flare
+different lighting for torches vs redstone lamps
+explosion effects
+god rays
+held light source emits light
