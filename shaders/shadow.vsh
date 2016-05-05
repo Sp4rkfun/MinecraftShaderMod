@@ -21,4 +21,42 @@ uniform vec3 previousCameraPosition; // A vec3 indicating the position in world 
 uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the camera transformations. This uniform previously had a slightly different purpose in mind, so the name is a bit ambiguous.
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
-void main() {}
+varying vec4 texcoord;
+varying vec4 color;
+
+uniform mat4 shadowProjectionInverse;
+uniform mat4 shadowProjection;
+uniform mat4 shadowModelViewInverse;
+uniform mat4 shadowModelView;
+
+float shadowMapBias = 0.75;	
+
+void main() {
+
+	color = gl_Color;
+
+	gl_Position = ftransform();
+	
+	texcoord = gl_MultiTexCoord0;
+	
+	vec4 position = gl_Position;
+		 position = shadowProjectionInverse * position;
+		 position = shadowModelViewInverse * position;
+	
+	texcoord = gl_MultiTexCoord0;
+	
+	position = shadowModelView * position;
+	position = shadowProjection * position;
+	
+	gl_Position = position;
+	
+	float dist = sqrt(gl_Position.x * gl_Position.x + gl_Position.y * gl_Position.y);
+	float distortFactor = (1.0f - shadowMapBias) + dist * shadowMapBias;
+	gl_Position.xy *= 1.0f /distortFactor;
+	
+	// Make it possible, to cast shadows underwater.
+	if (mc_Entity.x == 8.0 || mc_Entity.x == 9.0) gl_Position.xy *= 0.0;
+
+	gl_FrontColor = gl_Color;
+	
+}

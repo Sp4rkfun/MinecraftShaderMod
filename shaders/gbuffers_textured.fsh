@@ -21,4 +21,23 @@ uniform vec3 previousCameraPosition; // A vec3 indicating the position in world 
 uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the camera transformations. This uniform previously had a slightly different purpose in mind, so the name is a bit ambiguous.
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
-void main() {}
+varying vec4 color;
+varying vec2 texcoord;
+
+uniform vec3 upPosition;
+
+uniform mat4 gbufferProjectionInverse;
+
+void main() {
+
+	vec4 baseColor = texture2D(texture, texcoord.xy);// * color;
+
+
+	//vec4 fragposition	= gbufferProjectionInverse * (vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0) * 2.0 - 1.0);
+	//vec4 worldposition	= gbufferModelViewInverse * fragposition;
+
+/* DRAWBUFFERS:01 */
+
+	gl_FragData[0] = baseColor;
+
+}

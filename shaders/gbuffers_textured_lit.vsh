@@ -25,4 +25,29 @@ uniform vec3 previousCameraPosition; // A vec3 indicating the position in world 
 uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the camera transformations. This uniform previously had a slightly different purpose in mind, so the name is a bit ambiguous.
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
-void main() {}
+varying vec4 color;
+varying vec2 texcoord;
+varying float skyLightmap;
+
+float getSkyLightmap(vec2 coord) {
+
+	float minLight = 0.05;
+
+	return clamp(minLight + max(coord.t - 2.0 / 16.0, 0.0) * 1.14285714286, 0.0, 1.0);
+
+}
+
+void main() {
+	
+	vec4 position		= gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
+	vec2 lmcoord		= (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	texcoord			= (gl_MultiTexCoord0).xy;
+	color = gl_Color;
+
+	
+
+	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
+	
+	skyLightmap		= getSkyLightmap(lmcoord);
+	
+}

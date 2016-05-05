@@ -29,4 +29,31 @@ uniform vec3 previousCameraPosition; // A vec3 indicating the position in world 
 uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the camera transformations. This uniform previously had a slightly different purpose in mind, so the name is a bit ambiguous.
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
-void main() {}
+uniform int isEyeInWater;
+
+varying vec4 texcoord;
+
+uniform sampler2D gcolor;
+uniform sampler2D gdepth;
+uniform sampler2D gaux1;
+uniform sampler2D gaux4;
+uniform sampler2D depthtex0;
+uniform sampler2D depthtex2;
+uniform sampler2D noisetex;
+
+vec2 underwaterRefraction(vec2 tex){
+	float scale = 0.001;
+	if(isEyeInWater>0.9){
+		return vec2(tex.x+scale*sin(1.0*worldTime), tex.y+scale*sin(1.0*worldTime));
+	}
+
+	return tex;
+}
+float	getDepth		= texture2D(gdepth, texcoord.xy).x;
+void main() {
+	vec2 newTexcoord = underwaterRefraction(texcoord.xy);
+	vec4 color = texture2D(gaux1, newTexcoord.xy);
+	gl_FragColor = color;
+}
+
+
