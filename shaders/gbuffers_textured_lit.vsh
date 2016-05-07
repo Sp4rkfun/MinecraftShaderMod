@@ -28,15 +28,7 @@ uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 varying vec4 color;
 varying vec2 texcoord;
 varying vec4 lmcoord;
-//varying float skyLightmap;
-
-float getSkyLightmap(vec2 coord) {
-
-	float minLight = 0.05;
-
-	return clamp(minLight + max(coord.t - 2.0 / 16.0, 0.0) * 1.14285714286, 0.0, 1.0);
-
-}
+varying float depth;
 
 void main() {
 	
@@ -49,7 +41,6 @@ void main() {
 	
 
 	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
-	
-	//skyLightmap		= getSkyLightmap(lmcoord);
+	depth = length(position);
 	
 }
