@@ -25,14 +25,16 @@ uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
 varying vec4 color;
 varying vec2 texcoord;
-varying float skyLightmap;
+varying vec4 lmcoord;
+//varying float skyLightmap;
 
 void main() {
 
 	vec4 baseColor = texture2D(texture, texcoord.xy) * color;
+	baseColor = baseColor*texture2D(lightmap, lmcoord.st);
 
 /* DRAWBUFFERS:01 */
 
 	gl_FragData[0] = baseColor;
-	gl_FragData[1] = vec4(skyLightmap, 1.0, 1.0, 1.0);	// gdepth
+	//gl_FragData[1] = vec4(skyLightmap, 1.0, 1.0, 1.0);	// gdepth
 }

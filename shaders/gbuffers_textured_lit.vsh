@@ -27,7 +27,8 @@ uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
 varying vec4 color;
 varying vec2 texcoord;
-varying float skyLightmap;
+varying vec4 lmcoord;
+//varying float skyLightmap;
 
 float getSkyLightmap(vec2 coord) {
 
@@ -40,14 +41,15 @@ float getSkyLightmap(vec2 coord) {
 void main() {
 	
 	vec4 position		= gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
-	vec2 lmcoord		= (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	//vec2 lmcoord		= (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	texcoord			= (gl_MultiTexCoord0).xy;
 	color = gl_Color;
+	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 
 	
 
 	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
 	
-	skyLightmap		= getSkyLightmap(lmcoord);
+	//skyLightmap		= getSkyLightmap(lmcoord);
 	
 }
