@@ -49,11 +49,20 @@ vec2 underwaterRefraction(vec2 tex){
 
 	return tex;
 }
+
+vec4 expFog(float distance,vec4 color){
+	float attenuation = 0.05;
+	vec3 fogColor = vec3(0.5,0.5,0.5+0.15*(1-(worldTime/24000.0)));
+	float factor = exp(-distance*attenuation);
+	return vec4(mix(color.xyz,fogColor,1.0-factor),color.w);	
+}
+
 float	getDepth		= texture2D(gdepth, texcoord.xy).x;
 void main() {
 	vec2 newTexcoord = underwaterRefraction(texcoord.xy);
 	vec4 color = texture2D(gaux1, newTexcoord.xy);
-	gl_FragColor = color;
+	if(fogMode>0)
+		gl_FragColor = expFog(getDepth,color);
+	else
+		gl_FragColor = color;
 }
-
-
