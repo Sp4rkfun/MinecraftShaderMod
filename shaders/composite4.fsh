@@ -30,7 +30,7 @@ uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the 
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
 varying vec4 texcoord;
-
+a
 uniform sampler2D gcolor;
 uniform sampler2D gdepth;
 uniform sampler2D gaux1;
@@ -38,13 +38,29 @@ uniform sampler2D gaux4;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex2;
 uniform sampler2D noisetex;
-
+float	getDepth		= texture2D(gdepth, texcoord.xy).x;
 void main() {
 	// Get main color.
-	vec4 color = texture2D(gcolor, texcoord.st);
-	//vec4 color = texture2D(gaux1, texcoord.st);
-	float occ = texture2D(gaux1, texcoord.st).x;
-	color = vec4(color.rgb *occ,color.a);
+	vec4 color = texture2D(gaux1, texcoord.st);
 /* DRAWBUFFERS:4 */
+	int blurSize =0;
+	int div = 1;
+	if(getDepth<200){
+		blurSize = 5;
+		div= 11*11;
+	}
+	float blurOffset = 0.0025;
+	int i = -blurSize;
+	int j = -blurSize;
+	
+	while(i<=blurSize){
+		while(j<=blurSize){
+			color = color + texture2D(gaux1, texcoord.st+vec2(blurOffset*i,blurOffset*j));
+			j=j+1;
+		}
+		j=-blurSize;
+		i=i+1;
+	}
+	color= color / div;
 	gl_FragData[0] = color;
 }

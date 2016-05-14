@@ -1,31 +1,22 @@
-#version 120
+/* DRAWBUFFERS:0246 */
 
-/* gbuffers_water Uniforms */
-uniform sampler2D texture; // A sampler2D referencing the geometry's base texture.
-uniform sampler2D lightmap; // A sampler2D referencing the geometry's lighting texture.
-uniform sampler2D normals; // A sampler2D referencing the texture pack's 'terrain_n.png' file.
-uniform sampler2D specular; // A sampler2D referencing the texture pack's 'terrain_s.png' file.
+vec4 watercolor = vec4(0.1,0.2,.3,0.8);
 
-/* Common Uniforms */
-uniform int heldItemId; // An integer indicating the id of the currently held item or -1 if there is none.
-uniform int heldBlockLightValue; // An integer indicating the light emission value of the held block. Typically ranges from 0 to 15.
-uniform int fogMode; // An integer indicating the type of fog (usually linear or exponential) or 0 if there is no fog. Equivalent to glGetInteger(GL_FOG_MODE).
-uniform int worldTime; // An integer indicating the current world time. For the over-world this number ranges from 0 to 24000 and loops.
-uniform float viewWidth; // A float indicating the width of the viewport.
-uniform float viewHeight; // A float indicating the height of the viewport.
-uniform float aspectRatio; // A float derived from viewWidth / viewHeight.
-uniform float near; // A float indicating the near viewing plane distance.
-uniform float far; // A float indicating the far viewing plane distance.
-uniform float rainStrength; // A float indicating the strength of the rain (or in cold biomes, snow).
-uniform vec3 sunPosition; // A vec3 indicating the position of the sun in eye space.
-uniform vec3 moonPosition; // A vec3 indicating the position of the moon in eye space.
-uniform vec3 cameraPosition; // A vec3 indicating the position in world space of the entity to which the camera is attached.
-uniform vec3 previousCameraPosition; // A vec3 indicating the position in world space of the entity to which the camera was attached during the previous frame.
-uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the camera transformations. This uniform previously had a slightly different purpose in mind, so the name is a bit ambiguous.
-uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
-
+const float PI = 3.1415927;
 varying vec4 color;
 varying vec4 texcoord;
+varying vec4 lmcoord;
+varying vec3 binormal;
+varying vec3 normal;
+varying float iswater;
 
-void main() {
+uniform sampler2D texture;
+
+void main() {	
+	vec4 tex = vec4((watercolor * length(texture2D(texture, texcoord.xy).rgb*0.5)*color).rgb, watercolor.a);
+	vec4 frag2 = vec4(normal*0.5+0.5, 1.0f);	
+		
+	gl_FragData[0] = tex;
+	gl_FragData[1] = frag2;	
+	gl_FragData[2] = vec4(lmcoord.t, mix(1.0,0.05,iswater), lmcoord.s, 1.0);
 }

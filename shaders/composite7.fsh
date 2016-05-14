@@ -38,14 +38,10 @@ uniform sampler2D gaux4;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex2;
 uniform sampler2D noisetex;
-
-
-
-
+a
 void main() {
 	// Get main color.
 	vec4 color = texture2D(gaux1, texcoord.st);
 /* DRAWBUFFERS:4 */
 	gl_FragData[0] = color;
-
 }

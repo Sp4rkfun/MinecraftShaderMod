@@ -31,78 +31,62 @@ uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
 varying vec4 texcoord;
 
+
 uniform sampler2D gcolor;
 uniform sampler2D gdepth;
 uniform sampler2D gaux1;
 uniform sampler2D gaux4;
-uniform sampler2D depthtex0;
-uniform sampler2D depthtex2;
-uniform sampler2D noisetex;
+
+float scale = 1;
+
+float getDepth(vec2 tex){
+	float output =texture2D(gdepth, tex.xy).r;
+	//output = output +texture2D(gaux1, tex.xy).g*100;
+	//output = output +texture2D(gaux1, tex.xy).b*1000;
+	return output;
+}
 
 vec3 normal_from_depth(vec2 tex) {
   
-  vec2 offset1 = vec2(0.0,0.001);
-  vec2 offset2 = vec2(0.001,0.0);
-  float depth = texture2D(gdepth, tex.xy).x;
-  float depth1 = texture2D(gdepth, tex.xy + offset1).x;
-  float depth2 = texture2D(gdepth, tex.xy + offset2).x;
+  vec2 offset1 = vec2(0.0,0.0005);
+  vec2 offset2 = vec2(0.0005,0.0);
+  float depth = getDepth(tex.xy);
+  float depth1 = getDepth(tex.xy + offset1);
+  float depth2 = getDepth(tex.xy + offset2);
   
   vec3 p1 = vec3(offset1, depth1 - depth);
   vec3 p2 = vec3(offset2, depth2 - depth);
   
   vec3 normal = cross(p1, p2);
-  normal.z = -normal.z;//???? dont get this step
+  normal.z = normal.z;//???? dont get this step
   
   return normalize(normal);
 }
-int blurSize =5 ;
-vec4 hblur(vec4 c){
-	float blurOffset = 0.001;
-	for(int i = -1*blurSize;i<blurSize;i++){
-		c = c + texture2D(gaux1, texcoord.st+vec2(blurOffset*i,0));
-	}
-	return c /(blurSize*2+1);
-	
-}
-vec4 vblur(vec4 c){
-	float blurOffset = 0.001;
-	for(int i = -1*blurSize;i<blurSize;i++){
-		c = c + texture2D(gaux1, texcoord.st+vec2(0,blurOffset*i));
-	}
-	return c /(blurSize*2+1);
-	
-}
-
 void main() {
-
+	
 	// Get main color.
-	vec4 color = texture2D(gaux1, texcoord.st);
+	vec4 color = texture2D(gcolor, texcoord.st);
 /* DRAWBUFFERS:4 */
-	
-	float thresh = 0.9;
-	//gl_FragData[0] = color;
-	
-	vec3 normal = normal_from_depth(texcoord.st);
-	float ydot = dot(normal,vec3(0,1,0));
-	float xdot = dot(normal,vec3(1,0,0));
-	float zdot = dot(normal,vec3(0,0,1));
-	if(abs(zdot)<thresh){
-		color = vblur(color);
-		color = hblur(color);
+	getDepth(texcoord.xy);
+	gl_FragData[0] =vec4(0,getDepth(texcoord.xy),0,1);
+	//gl_FragData[0] =vec4(0,1,0,1);
+	a
+	float offset = 0.001;
+	vec3 pixelN=normal_from_depth(texcoord.xy);
+	vec3 up = normal_from_depth(texcoord.xy+vec2(0,offset));
+	vec3 down = normal_from_depth(texcoord.xy-vec2(0,offset));
+	vec3 left = normal_from_depth(texcoord.xy+vec2(offset,0));
+	vec3 right = normal_from_depth(texcoord.xy-vec2(offset,0));
+	float op = dot(pixelN,up);
+	float od = dot(pixelN,down);
+	float ol = dot(pixelN,left);
+	float or = dot(pixelN,right);
+	float occ = (op+od+ol+or)/4;
+	if(op<0.1||od<0.1){
+		occ=0.0;
 	}
-	if(abs(xdot)<thresh){
-		color = vblur(color);
-	}
-	if(abs(ydot)<thresh){
-		color = hblur(color);
-	}
-	float occ = 0.2;
-	if(color.x<occ){
-		color=vec4(occ,occ,occ,1);
-	}else{
-		color=vec4(1,1,1,0);
-	}
-	
-	gl_FragData[0] = color;
+	//occ=getDepth/10;
+	gl_FragData[0]=vec4(abs(pixelN),1);
+	//gl_FragData[0] = vec4(occ,occ,occ,1);
 
 }

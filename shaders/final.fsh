@@ -61,8 +61,8 @@ float	getDepth		= texture2D(gdepth, texcoord.xy).x;
 void main() {
 	vec2 newTexcoord = underwaterRefraction(texcoord.xy);
 	vec4 color = texture2D(gaux1, newTexcoord.xy);
-	if(fogMode>0)
-		gl_FragColor = expFog(getDepth,color);
-	else
+	//if(fogMode>100)
+	//	gl_FragColor = expFog(getDepth,color);
+	//else
 		gl_FragColor = color;
 }
