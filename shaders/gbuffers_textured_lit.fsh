@@ -3,6 +3,7 @@
 /* gbuffers_textured_lit Uniforms */
 uniform sampler2D texture; // A sampler2D referencing the geometry's base texture.
 uniform sampler2D lightmap; // A sampler2D referencing the geometry's lighting texture.
+uniform sampler2DShadow shadow;
 
 /* Common Uniforms */
 uniform int heldItemId; // An integer indicating the id of the currently held item or -1 if there is none.
@@ -22,6 +23,10 @@ uniform vec3 previousCameraPosition; // A vec3 indicating the position in world 
 uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the camera transformations. This uniform previously had a slightly different purpose in mind, so the name is a bit ambiguous.
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 shadowProjection;
+uniform mat4 shadowModelView;
 
 varying vec4 color;
 varying vec2 texcoord;
@@ -31,7 +36,13 @@ varying float depth;
 void main() {
 
 	vec4 baseColor = texture2D(texture, texcoord.xy) * color;
-	//baseColor = baseColor*texture2D(lightmap, lmcoord.st);
+	baseColor = baseColor*texture2D(lightmap, lmcoord.st);
+	//vec4 fragposition	= gbufferProjectionInverse * (vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0) * 2.0 - 1.0);
+	//vec4 worldposition	= gbufferModelViewInverse * fragposition;
+	//float shading = shadow2D(shadow, worldposition.xyz).x;
+	//texture2D(shadow, worldposition.xyz);
+	//baseColor = vec4(baseColor.rgb*shading,baseColor.a);
+	//baseColor = vec4(shading,shading,shading,1);
 
 /* DRAWBUFFERS:01 */
 

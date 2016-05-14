@@ -30,17 +30,50 @@ uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the 
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
 varying vec4 texcoord;
-varying vec3 lightVector;
 
 
 uniform sampler2D gcolor;
+uniform sampler2D gdepth;
+float	getDepth		= texture2D(gdepth, texcoord.xy).x;
+vec3 normal_from_depth(vec2 tex) {
+  
+  vec2 offset1 = vec2(0.0,0.001);
+  vec2 offset2 = vec2(0.001,0.0);
+  float depth = texture2D(gdepth, tex.xy).x;
+  float depth1 = texture2D(gdepth, tex.xy + offset1).x;
+  float depth2 = texture2D(gdepth, tex.xy + offset2).x;
+  
+  vec3 p1 = vec3(offset1, depth1 - depth);
+  vec3 p2 = vec3(offset2, depth2 - depth);
+  
+  vec3 normal = cross(p1, p2);
+  normal.z = normal.z;//???? dont get this step
+  
+  return normalize(normal);
+}
 
 void main() {
 
 	// Get main color.
 	vec4 color = texture2D(gcolor, texcoord.st);
 /* DRAWBUFFERS:4 */
-
-	gl_FragData[0] = color;
+	
+	//gl_FragData[0] = color;
+	float offset = 0.005;
+	vec3 pixelN=normal_from_depth(texcoord.xy);
+	vec3 up = normal_from_depth(texcoord.xy+vec2(0,offset));
+	vec3 down = normal_from_depth(texcoord.xy-vec2(0,offset));
+	vec3 left = normal_from_depth(texcoord.xy+vec2(offset,0));
+	vec3 right = normal_from_depth(texcoord.xy-vec2(offset,0));
+	float op = dot(pixelN,up);
+	float od = dot(pixelN,down);
+	float ol = dot(pixelN,left);
+	float or = dot(pixelN,right);
+	float occ = 1.0;//(op+od+ol+or)/4;
+	if(op<0.1||od<0.1){
+		occ=0.0;
+	}
+	//gl_FragData[0]=vec4(abs(pixelN),1);
+	gl_FragData[0] = vec4(occ,occ,occ,1);
 
 }

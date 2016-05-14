@@ -33,18 +33,11 @@ uniform mat4 gbufferModelView; // The 4x4 modelview matrix after setting up the 
 uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 
 varying vec4 texcoord;
-varying vec3 lightVector;
 
 void main() {
 	
 	texcoord = gl_MultiTexCoord0;
 	
 	gl_Position = ftransform();
-	
-	if (worldTime < 12700 || worldTime > 23250) {
-		lightVector = normalize(sunPosition);
-	} else {
-		lightVector = normalize(moonPosition);
-	}
 	
 }
