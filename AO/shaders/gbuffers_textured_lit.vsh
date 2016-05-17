@@ -30,74 +30,15 @@ varying vec4 color;
 varying vec2 texcoord;
 varying vec4 lmcoord;
 varying float depth;
+varying float id;
 uniform float frameTimeCounter;
 
-vec3 wind(vec3 pos){
-	//Position is not the absolute position, moves based on camera
-	float onGround 	= 0.0;
-	if (gl_MultiTexCoord0.t < mc_midTexCoord.t) onGround = 1.0;
-	if (mc_Entity.x == 6.0 ||	// Saplings.
-		mc_Entity.x == 31.0 ||	// Grass.
-		mc_Entity.x == 37.0 ||	// Yellow flower.
-		mc_Entity.x == 38.0 ||	// Red flower and others.
-		mc_Entity.x == 59.0 ||	// Wheat.
-		mc_Entity.x == 141.0 ||	// Carrots.
-		mc_Entity.x == 142.0 // Potatoes.
-		) {
-		float res = 100;
-		float speed = 4.0;
-		float dir = sin(frameTimeCounter/speed/speed);
-		float strength = abs(0.5*sin(worldTime/10000.0));
-		float windX = sin(frameTimeCounter *speed+(pos.z+cameraPosition.z)*res)*max(0.1,sin(dir*3.14));
-		float windZ = sin(frameTimeCounter *speed+(pos.x+cameraPosition.x)*res)*max(0.1,cos(dir*-3.14));
-		if(onGround>0.9){ //Keeps the base in the same location
-			pos.x += strength *windX;
-			pos.z += strength*windZ;
-		}
-	}else if(
-		mc_Entity.x == 106.0 ||// Vines. TODO
-		mc_Entity.x == 161.0 ||// Acacia leaves.
-		mc_Entity.x == 18.0	//leaves.
-	){
-		float res = 100;
-		float speed = 4.0;
-		float dir = sin(frameTimeCounter/speed/speed);
-		float strength = abs(0.1*sin(worldTime/10000.0));
-		if(mc_Entity.x==106.0){
-			strength = strength*0.5;
-		}
-		float windX = sin(frameTimeCounter *speed+(pos.z+cameraPosition.z)*res)*max(0.1,sin(dir*3.14));
-		float windZ = sin(frameTimeCounter *speed+(pos.x+cameraPosition.x)*res)*max(0.1,cos(dir*-3.14));
-		pos.x += strength *windX;
-		pos.z += strength*windZ;
-	}else if(
-		mc_Entity.x == 83.0 //sugar cane
-		||mc_Entity.x == 175.0 // Tall grass/flowers
-	){
-		float res = 100;
-		float speed = 4.0;
-		float dir = sin(frameTimeCounter/speed/speed);
-		float strength = abs(0.1*sin(worldTime/10000.0));
-		float windX = sin(frameTimeCounter *speed+(pos.y+cameraPosition.y)*res)*max(0.1,sin(dir*3.14));
-		float windZ = sin(frameTimeCounter *speed+(pos.y+cameraPosition.y)*res)*max(0.1,cos(dir*-3.14));
-		windX = windX*max(pos.y,0);
-		windZ = windZ*max(pos.y,0);
-		pos.x += strength *windX;
-		pos.z += strength*windZ;
-	}
-	return pos;
-}
-
 void main() {
-	
+	id = mc_Entity.x;
 	vec4 position		= gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
-	//vec2 lmcoord		= (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	texcoord			= (gl_MultiTexCoord0).xy;
 	color = gl_Color;
 	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
-	
-	position.xyz = wind(position.xyz);
-	
 
 	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
 	depth = length(position);
