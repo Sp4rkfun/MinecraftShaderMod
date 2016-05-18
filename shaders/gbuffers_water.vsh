@@ -2,6 +2,7 @@ varying vec4 color;
 varying vec4 lmcoord;
 varying vec3 normal;
 varying vec3 worldpos;
+varying vec4 texcoord;
 varying float iswater;
 
 attribute vec4 mc_Entity;
@@ -19,7 +20,7 @@ void main() {
 	if(mc_Entity.x == 8.0 || mc_Entity.x == 9.0) {
 		iswater = 1.0;
 	}
-	
+	texcoord			= (gl_MultiTexCoord0);
 	viewpos = gbufferModelView * viewpos;
 	gl_Position = gl_ProjectionMatrix * viewpos;	
 	color = gl_Color;

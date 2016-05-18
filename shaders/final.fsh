@@ -32,11 +32,12 @@ uniform mat4 gbufferModelViewInverse; // The inverse of gbufferModelView.
 uniform int isEyeInWater;
 
 varying vec4 texcoord;
+varying vec3 lightVector;
 
 uniform sampler2D gcolor;
 uniform sampler2D gdepth;
 uniform sampler2D gaux1;
-uniform sampler2D gaux4;
+uniform sampler2D gaux2;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex2;
 uniform sampler2D noisetex;
@@ -51,18 +52,104 @@ vec2 underwaterRefraction(vec2 tex){
 }
 
 vec4 expFog(float distance,vec4 color){
-	float attenuation = 0.05;
+	float attenuation = 0.03;
 	vec3 fogColor = vec3(0.5,0.5,0.5+0.15*(1-(worldTime/24000.0)));
 	float factor = exp(-distance*attenuation);
 	return vec4(mix(color.xyz,fogColor,1.0-factor),color.w);	
 }
+//https://www.shadertoy.com/view/ldSXWK
+vec3 lensflare(vec3 color, vec2 uv,vec2 pos,vec3 fragpos)
+{
+	float sunlight = dot(normalize(fragpos), lightVector);
+	if (sunlight < 0) return color;
+    float intensity = 2.2;
+	vec2 main = uv-pos;
+	vec2 uvd = uv*(length(uv));
 
-float	getDepth		= texture2D(gdepth, texcoord.xy).x;
+	vec2 uvx = mix(uv,uvd,-0.4);
+	
+	float f1 = max(0.01-pow(length(uvx+0.5*pos),2.4),.0)*2.0;
+	float f12 = max(0.01-pow(length(uvx+0.55*pos),2.4),.0)*3.0;
+	float f13 = max(0.01-pow(length(uvx+0.6*pos),2.4),.0)*1.5;
+
+	uvx = mix(uv,uvd,-0.3);
+	
+	float f2 = max(0.01-pow(length(uvx+0.2*pos),3.5),.0)*2.0;
+	float f22 = max(0.01-pow(length(uvx+0.4*pos),3.5),.0)*2.0;
+	float f23 = max(0.01-pow(length(uvx+0.45*pos),3.5),.0)*2.0;
+	
+	uvx = mix(uv,uvd,-0.5);
+	
+	float f3 = max(0.01-pow(length(uvx-0.3*pos),1.6),.0)*6.0;
+	float f32 = max(0.01-pow(length(uvx-0.325*pos),1.6),.0)*3.0;
+	float f33 = max(0.01-pow(length(uvx-0.35*pos),1.6),.0)*5.0;
+	
+	vec3 c = vec3(0.0);
+	
+	c.r+=f1+f2+f3; c.g+=f12+f22+f32; c.b+=f13+f23+f33;
+	c =max( c*1.2 - vec3(length(uvd)*.04),0.0);
+	
+	return color + vec3(1.6,1.2,1.4)*c*intensity;
+}
+
+vec3 renderGodrays(vec3 clr, vec3 sunClr, vec3 fragpos, vec2 lPos) {
+
+	float	godraysIntensity		= 0.3;
+	float	godraysExposure			= 2.0;
+	int		godraysSamples			= 50;
+	float	godraysDensity			= 1.4;
+	float	godraysMipmapping		= 1.0;
+
+		float grSample = 0.0;
+
+		vec2 grCoord			= texcoord.st;
+		vec2 deltaTextCoord		= vec2(texcoord.st - lPos.xy);
+			 deltaTextCoord	   *= (1.0 / float(godraysSamples) )* godraysDensity;
+
+		float sunVector = max(dot(normalize(fragpos.xyz), lightVector), 0.0);
+		float calcSun	= pow(sunVector, 7.5);
+
+		for(int i = 0; i < godraysSamples; i++) {
+			grCoord		-= deltaTextCoord;
+			grSample	+= texture2D(gaux1, grCoord, godraysMipmapping).a;
+		}
+
+		// Decrease godray intensity at night.
+		if(worldTime > 12700 && worldTime < 23250)
+		godraysIntensity = mix(godraysIntensity, godraysIntensity / 4.0, 
+			log2(1+ 0.00009478672*(worldTime-12700.0)));
+
+		grSample /= float(godraysSamples) / godraysIntensity;
+
+		return mix(clr, sunClr*godraysExposure , grSample*calcSun);
+		//return clr;
+}
+
+float	getDepth = texture2D(depthtex0, texcoord.xy).x;
 void main() {
+	const bool gaux1MipmapEnabled		= true;
 	vec2 newTexcoord = underwaterRefraction(texcoord.xy);
 	vec4 color = texture2D(gaux1, newTexcoord.xy);
-	//if(fogMode>100)
-	//	gl_FragColor = expFog(getDepth,color);
-	//else
+	if(fogMode>0)
+		gl_FragColor = expFog(getDepth,color);
+	else
 		gl_FragColor = color;
+	
+	vec3 gr_Color = vec3(200, 150, 50)/255.0; //vec3(1.0,0.5,1.0);
+		// Set up positions.
+	vec4 skyFragposition = gbufferProjectionInverse * vec4(texcoord.s * 2.0f - 1.0f,
+	texcoord.t * 2.0f - 1.0f, 2.0f * getDepth - 1.0f, 1.0f);
+	skyFragposition /= skyFragposition.w;
+	
+	vec4 tpos = vec4(sunPosition, 1.0) * gbufferProjection;
+	tpos = vec4(tpos.xyz / tpos.w, 1.0);
+	vec2 pos1 = tpos.xy / tpos.z;
+	vec2 lightPos = pos1 * 0.5 + 0.5;
+	
+	color.rgb = renderGodrays(color.rgb, gr_Color, skyFragposition.xyz, lightPos);
+	if((worldTime < 12700 || worldTime > 23250)){
+		color.rgb = lensflare(color.rgb,newTexcoord*2.0-1.0,pos1,skyFragposition.xyz);
+	//if(texture2D(gaux1, pos1).a>0)
+	}
+	gl_FragColor = color;//*texture2D(gaux1, pos1).a;
 }
