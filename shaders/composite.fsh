@@ -339,7 +339,7 @@ void main() {
 		color = drawMoon(color,getMoonColor(),skyFragposition.xyz,lightVectorM);
 	}
 	
-/* DRAWBUFFERS:4*/
-	gl_FragData[0] = vec4(color, pow(getSkyMask(getCloudNoise(skyFragposition.xyz, 0), lightPos), 3.0));
-	//gl_FragData[0] = color*getSkyMask(getCloudNoise(skyFragposition.xyz, 0), lightPos);
+/* DRAWBUFFERS:05 */
+	gl_FragData[0] = vec4(1,0,1,1);
+	gl_FragData[1] = vec4(color, pow(getSkyMask(getCloudNoise(skyFragposition.xyz, 0), lightPos), 3.0));
 }
