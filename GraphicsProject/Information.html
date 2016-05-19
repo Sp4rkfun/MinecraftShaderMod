@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+li.menuItem {
+    float: left;
+}
+
+li.menuItem a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li.menuItem a:hover {
+    background-color: #111;
+}
+.active {
+    background-color: #4CAF50;
+}
+
+.indent{
+	margin-left: 30px;
+}
+
+</style>
+</head>
+<body>
+
+<ul class = "menu">
+  <li class = "menuItem"><a href="index.html">Home</a></li>
+  <li class = "menuItem"><a href="Screen-Shots.html">Screen-Shots</a></li>
+  <li class = "menuItem"><a class="active">Information</a></li>
+</ul>
+
+<p><b>Installation Instructions:</b></P>
+
+<ul>
+  <li>Download and install latest version of minecraft</li>
+  <li>Download and install latest version of OptiFine for minecraft</li>
+  <li>Run the optifine program using java and press install</li>
+  <li>Once installed start minecraft and select the OptiFine profile in the buttom left</li>
+  <li>Press play and run minecraft </li>
+  <li>Under options – Video Settings – Shaders you will see a list of all shaders currently in the minecraft shaders folder.</li>
+  <li>To install an existing shaders drag and drop the shader into this file. You should now be able to view and click on it within the minecraft application</li>
+  <li class = "indent">You are able to create new shaders by opening the shaders folder, creating a new folder, then within that folder create a folder called shaders.</li>
+  <li class = "indent">See http://minecraft.gamepedia.com/Mods/Creating_mods for information on how to create fragment/vertex shaders</li>
+</ul>
+
+<br \>
+
+<p><b>Project Overview: </b></p>
+<p>While this project was extremely interesting, it was also frustrating and time consuming. Short of writing and designing our on texture pack mod in minecraft our only option was to use open glsl to create shaders. Sadly there is little to no documentation on how the shaders work. We were forced to deconstruct many projects in order to form a greater understanding of how the Optifine addon worked. Once that was completed the three of us choose different graphical tasks that we were interested in creating and integrating. Alvin choose ambient occlusion, Alex choose god rays and sun flare, and David choose water effects. It was a struggling understanding how to integrate all the features together as there was little communication on who would use what buffers. In the end the result looked pleasing and a lot of knowledge was gained.<p/>   
+
+</body>
+</html>
