@@ -61,7 +61,7 @@ vec4 expFog(float distance,vec4 color){
 vec3 lensflare(vec3 color, vec2 uv,vec2 pos,vec3 fragpos)
 {
 	float sunlight = dot(normalize(fragpos), lightVector);
-	if (sunlight < 0) return color;
+	if (sunlight < 0.2) return color;
     float intensity = 2.2;
 	vec2 main = uv-pos;
 	vec2 uvd = uv*(length(uv));
@@ -98,16 +98,13 @@ vec3 renderGodrays(vec3 clr, vec3 sunClr, vec3 fragpos, vec2 lPos) {
 	float	godraysExposure			= 2.0;
 	int		godraysSamples			= 50;
 	float	godraysDensity			= 1.4;
-	float	godraysMipmapping		= 1.0;
+	float	godraysMipmapping		= 2.0;
 
 		float grSample = 0.0;
 
 		vec2 grCoord			= texcoord.st;
 		vec2 deltaTextCoord		= vec2(texcoord.st - lPos.xy);
 			 deltaTextCoord	   *= (1.0 / float(godraysSamples) )* godraysDensity;
-
-		float sunVector = max(dot(normalize(fragpos.xyz), lightVector), 0.0);
-		float calcSun	= pow(sunVector, 7.5);
 
 		for(int i = 0; i < godraysSamples; i++) {
 			grCoord		-= deltaTextCoord;
@@ -121,8 +118,10 @@ vec3 renderGodrays(vec3 clr, vec3 sunClr, vec3 fragpos, vec2 lPos) {
 
 		grSample /= float(godraysSamples) / godraysIntensity;
 
+		float sunlight = max(dot(normalize(fragpos.xyz), lightVector), 0.0);
+		float calcSun	= pow(sunlight, 7.5);
+		
 		return mix(clr, sunClr*godraysExposure , grSample*calcSun);
-		//return clr;
 }
 
 float	getDepth = texture2D(depthtex0, texcoord.xy).x;
@@ -135,7 +134,7 @@ void main() {
 	else
 		gl_FragColor = color;
 	
-	vec3 gr_Color = vec3(200, 150, 50)/255.0; //vec3(1.0,0.5,1.0);
+	vec3 ray_color = vec3(200, 150, 50)/255.0; //vec3(1.0,0.5,1.0);
 		// Set up positions.
 	vec4 skyFragposition = gbufferProjectionInverse * vec4(texcoord.s * 2.0f - 1.0f,
 	texcoord.t * 2.0f - 1.0f, 2.0f * getDepth - 1.0f, 1.0f);
@@ -145,11 +144,9 @@ void main() {
 	tpos = vec4(tpos.xyz / tpos.w, 1.0);
 	vec2 pos1 = tpos.xy / tpos.z;
 	vec2 lightPos = pos1 * 0.5 + 0.5;
-	
-	color.rgb = renderGodrays(color.rgb, gr_Color, skyFragposition.xyz, lightPos);
-	if((worldTime < 12700 || worldTime > 23250)){
+		color.rgb = renderGodrays(color.rgb, ray_color, skyFragposition.xyz, lightPos);
+	if((worldTime < 12700 || worldTime > 23250) && 	(texture2D(gaux1, lightPos).a>0)){
 		color.rgb = lensflare(color.rgb,newTexcoord*2.0-1.0,pos1,skyFragposition.xyz);
-	//if(texture2D(gaux1, pos1).a>0)
 	}
 	gl_FragColor = color;//*texture2D(gaux1, pos1).a;
 }

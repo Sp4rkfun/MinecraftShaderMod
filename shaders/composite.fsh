@@ -133,28 +133,8 @@ float getCloudNoise(vec3 fragpos, int integer_i) {
 }
 
 float getSkyMask(float cloudMask, vec2 lPos) {
-
-	float gr	= 0.0;
 	float depth	= texture2D(depthtex0, texcoord.xy).x;
-
-		gr = float(depth > comp);
-
-	// Calculate sun occlusion (only on one pixel).
-	if (texcoord.x < 0.002 && texcoord.y < 0.002) {
-		for (int i = -6; i < 7;i++) {
-			for (int j = -6; j < 7 ;j++) {
-				vec2 ij = vec2(i, j);
-				float temp = texture2D(depthtex0, lPos + sign(ij) * sqrt(abs(ij)) * vec2(0.002)).x;
-					gr += float(temp > comp);
-			}
-		}
-
-		gr /= 144.0;
-
-	}
-
-	return gr;
-
+		return float(depth > comp);
 }
 
 vec3 drawSun(vec3 color ,vec3 sunColor,vec3 sky,vec3 light){
@@ -225,9 +205,9 @@ float waterH(vec3 posxz) {
 
 	return amplitude * wave2 + amplitude * wave;
 }
-
+float	getDepth = texture2D(depthtex0, texcoord.xy).x;
 void main() {
-	vec4 skyFragposition = gbufferProjectionInverse * vec4(texcoord.s * 2.0f - 1.0f, texcoord.t * 2.0f - 1.0f, 1.0f, 1.0f);
+	vec4 skyFragposition = gbufferProjectionInverse * vec4(texcoord.s * 2.0f - 1.0f, texcoord.t * 2.0f - 1.0f, 2.0f * getDepth - 1.0f, 1.0f);
 		skyFragposition /= skyFragposition.w;
 	vec3 color = texture2D(gcolor, newtc.st).rgb;
 	float land = float(aux.g > 0.04);
